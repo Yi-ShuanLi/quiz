@@ -28,6 +28,7 @@ public interface QuizDao extends JpaRepository<Quiz,QuizId> {
 	public boolean existsByQuizIdAndPublishedFalseOrQuizIdAndStartDateAfter(//
 			int quizId1,int quizId2,LocalDate now);
 	public void deleteByQuizId(int quizId);
+	//select 不是新增刪除修改，不需要加@Modifying
 	@Query(value="select qu_id from quiz where quiz_id=?1 And Necessary=true ",nativeQuery=true) //直接去資料庫撈，寫true ;用entity屬性可以寫false
 	public List <Integer> findQuIdByQuizIdAndNecessaryTrue(int quizId);
 	public List <Quiz> findByQuizId(int quizId);

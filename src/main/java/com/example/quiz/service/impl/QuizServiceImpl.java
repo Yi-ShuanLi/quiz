@@ -25,6 +25,7 @@ import com.example.quiz.vo.CreateOrUpdateReq;
 import com.example.quiz.vo.DeleteQuizReq;
 import com.example.quiz.vo.SearchRes;
 import com.example.quiz.vo.StatisticsRes;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.example.quiz.vo.AnswerReq;
 import com.example.quiz.vo.BaseRes;
 
@@ -165,19 +166,21 @@ public class QuizServiceImpl implements QuizService{
 					req.getQuizList().get(0).getQuizId(),req.getQuizList().get(0).getQuizId(), LocalDate.now())){
 				return new BaseRes(RtnCode.QUIZ_NOT_FOUND.getCode(),RtnCode.QUIZ_NOT_FOUND.getMessage());
 			}
-		}
-		
-		try {
-			quizDao.deleteByQuizId(req.getQuizList().get(0).getQuizId());
-		}catch(Exception e) {
-			return new BaseRes(RtnCode.DELETE_QUIZ_ERROR.getCode(),RtnCode.DELETE_QUIZ_ERROR.getMessage());
+			try {
+				quizDao.deleteByQuizId(req.getQuizList().get(0).getQuizId());
+			}catch(Exception e) {
+				return new BaseRes(RtnCode.DELETE_QUIZ_ERROR.getCode(),RtnCode.DELETE_QUIZ_ERROR.getMessage());
+			}
 		}
 		// 根據是否要發布，再把published set 的值set到傳送過來的quizList中
 		for (Quiz item : req.getQuizList()) {
 			item.setPublished(req.isPublished());
 		}
-		
-		quizDao.saveAll(req.getQuizList());
+		try {
+			quizDao.saveAll(req.getQuizList());
+		}catch(Exception e) {
+			return new BaseRes(RtnCode.SAVE_QUIZ_ERROR.getCode(),RtnCode.SAVE_QUIZ_ERROR.getMessage());
+		}
 		return new BaseRes(RtnCode.SUCCESS.getCode(),RtnCode.SUCCESS.getMessage());
 	}
 
@@ -291,6 +294,18 @@ public class QuizServiceImpl implements QuizService{
 		}
 			
 		return new StatisticsRes(RtnCode.SUCCESS.getCode(),RtnCode.SUCCESS.getMessage(),quizIdAndAnsCountMap);
+	}
+
+	@Override
+	public BaseRes objMapper(String str) {
+		ObjectMapper mapper=new ObjectMapper();
+		try {
+			Quiz quiz = mapper.readValue(str, Quiz.class);
+		}catch(Exception e) {
+			
+			return new BaseRes(RtnCode.ERROR_CODE,e.getMessage());
+		}
+		return new BaseRes(RtnCode.SUCCESS.getCode(),RtnCode.SUCCESS.getMessage());
 	}
 
 	
